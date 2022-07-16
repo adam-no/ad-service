@@ -9,7 +9,7 @@ import pl.adamnowicki.ad.primaryadapter.restapi.ListingsDto.ListingDto;
 
 import java.util.UUID;
 
-import static pl.adamnowicki.ad.domain.listing.Listing.ListingStatus.INACTIVE;
+import static pl.adamnowicki.ad.domain.listing.Listing.PublicationStatus.INACTIVE;
 import static pl.adamnowicki.ad.domain.listing.ListingId.of;
 import static pl.adamnowicki.ad.primaryadapter.restapi.RestApiWebUiConfiguration.ROOT_V1;
 
@@ -30,7 +30,10 @@ class ListingController {
     var listingDtos = listingQuery.listAllListings().stream()
         .map(listing -> ListingDto.builder()
             .id(listing.getId().unwrap())
-            .content(listing.getContent())
+            .title(listing.getTitle())
+            .description(listing.getDescription())
+            .price(listing.getPrice())
+            .publicationStatus(listing.getStatus())
             .build())
         .toList();
     return ListingsDto.builder()
@@ -41,7 +44,9 @@ class ListingController {
   @PostMapping()
   void createListing(@RequestBody CreateListingRequest createListingRequest) {
     CreateListingCommand createListingCommand = CreateListingCommand.builder()
-        .content(createListingRequest.getContent())
+        .title(createListingRequest.getTitle())
+        .description(createListingRequest.getDescription())
+        .price(createListingRequest.getPrice())
         .build();
     ListingId handle = createListingCommandHandler.handle(createListingCommand);
 
@@ -66,7 +71,9 @@ class ListingController {
 
     UpdateListingCommand updateListingCommand = UpdateListingCommand.builder()
         .listingId(of(listingId))
-        .content(updateListingRequest.getContent())
+        .title(updateListingRequest.getTitle())
+        .description(updateListingRequest.getDescription())
+        .price(updateListingRequest.getPrice())
         .build();
 
     updateListingCommandHandler.handle(updateListingCommand);
@@ -90,7 +97,7 @@ class ListingController {
       @PathVariable("id") UUID listingId) {
 
     ModifyPublicationStatusCommand modifyPublicationStatusCommand = ModifyPublicationStatusCommand.builder()
-        .listingStatus(INACTIVE)
+        .publicationStatus(INACTIVE)
         .listingId(of(listingId))
         .build();
     modifyPublicationStatusCommandHandler.handle(modifyPublicationStatusCommand);

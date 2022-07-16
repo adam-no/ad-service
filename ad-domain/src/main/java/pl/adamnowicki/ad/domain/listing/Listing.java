@@ -3,18 +3,22 @@ package pl.adamnowicki.ad.domain.listing;
 import lombok.Builder;
 import lombok.Value;
 
-import static pl.adamnowicki.ad.domain.listing.Listing.ListingStatus.INACTIVE;
+import java.math.BigDecimal;
+
+import static pl.adamnowicki.ad.domain.listing.Listing.PublicationStatus.INACTIVE;
 
 @Value
 @Builder
 public class Listing {
 
   ListingId id;
-  String content;
+  String title;
+  String description;
+  BigDecimal price;
   @Builder.Default
-  ListingStatus status = INACTIVE;
+  PublicationStatus status = INACTIVE;
 
-  public enum ListingStatus {
+  public enum PublicationStatus {
     ACTIVE,
     INACTIVE
   }
@@ -22,7 +26,9 @@ public class Listing {
   public ListingBuilder asBuilder() {
     return Listing.builder()
         .id(this.id)
-        .content(this.content)
+        .title(this.title)
+        .description(this.description)
+        .price(this.price)
         .status(this.status);
   }
 }

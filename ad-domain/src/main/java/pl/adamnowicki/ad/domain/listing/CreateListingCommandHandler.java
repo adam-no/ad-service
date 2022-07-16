@@ -15,7 +15,9 @@ public class CreateListingCommandHandler {
 
     Listing newListing = Listing.builder()
         .id(listingId)
-        .content(createListingCommand.getContent())
+        .title(createListingCommand.getTitle())
+        .description(createListingCommand.getDescription())
+        .price(createListingCommand.getPrice())
         .build();
 
     forManipulatingListing.storeListing(newListing);

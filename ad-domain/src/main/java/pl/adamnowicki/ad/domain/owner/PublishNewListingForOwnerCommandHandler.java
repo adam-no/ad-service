@@ -6,7 +6,7 @@ import pl.adamnowicki.ad.domain.listing.*;
 
 import java.util.Optional;
 
-import static pl.adamnowicki.ad.domain.listing.Listing.ListingStatus.ACTIVE;
+import static pl.adamnowicki.ad.domain.listing.Listing.PublicationStatus.ACTIVE;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -32,14 +32,14 @@ public class PublishNewListingForOwnerCommandHandler {
     }
 
     ModifyPublicationStatusCommand modifyPublicationStatusCommand = ModifyPublicationStatusCommand.builder()
-        .listingStatus(ACTIVE)
+        .publicationStatus(ACTIVE)
         .listingId(listingId)
         .build();
     modifyPublicationStatusCommandHandler.handle(modifyPublicationStatusCommand);
 
     if (getActiveListingCountForOwner(owner) > maxActiveListingsPerOwner) {
       ModifyPublicationStatusCommand revertPublicationStatusCommand = ModifyPublicationStatusCommand.builder()
-          .listingStatus(Listing.ListingStatus.INACTIVE)
+          .publicationStatus(Listing.PublicationStatus.INACTIVE)
           .listingId(listingId)
           .build();
       modifyPublicationStatusCommandHandler.handle(revertPublicationStatusCommand);
@@ -47,7 +47,7 @@ public class PublishNewListingForOwnerCommandHandler {
       return fail(publishNewListingForOwnerCommand);
     }
 
-    log.info("PublishNewListingForOwnerCommandHandler completed, attachNewListingCommand={}",
+    log.info("PublishNewListingForOwnerCommandHandler completed, publishNewListingForOwnerCommand={}",
         publishNewListingForOwnerCommand);
     return true;
   }

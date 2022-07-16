@@ -3,9 +3,13 @@ package pl.adamnowicki.ad.primaryadapter.restapi;
 import lombok.Builder;
 import lombok.Value;
 
+import java.math.BigDecimal;
+
 @Value
 @Builder
 class UpdateListingRequest {
 
-  String content;
+  String title;
+  String description;
+  BigDecimal price;
 }

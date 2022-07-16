@@ -11,12 +11,14 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.web.server.LocalServerPort;
 import pl.adamnowicki.ad.domain.listing.ForManipulatingListing;
+import pl.adamnowicki.ad.domain.listing.Listing;
 import pl.adamnowicki.ad.domain.owner.ForManipulatingOwner;
 import pl.adamnowicki.ad.primaryadapter.restapi.ListingsDto;
 import pl.adamnowicki.ad.primaryadapter.restapi.OwnersDto;
 import pl.adamnowicki.ad.secondaryadapter.inmemorydb.ForManipulatingListingAdapter;
 import pl.adamnowicki.ad.secondaryadapter.inmemorydb.ForManipulatingOwnerAdapter;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 import static io.restassured.RestAssured.given;
@@ -30,7 +32,9 @@ import static pl.adamnowicki.ad.primaryadapter.restapi.RestApiWebUiConfiguration
 class AdApplicationTests {
 
   private static final String OWNER_NAME = "John Doe";
-  private static final String LISTING_CONTENT = "some content";
+  private static final String LISTING_TITLE = "some title";
+  private static final String LISTING_DESCRIPTION = "some content";
+  private static final BigDecimal LISTING_PRICE = BigDecimal.TEN;
 
   @Autowired
   ForManipulatingOwner forManipulatingOwner;
@@ -67,13 +71,16 @@ class AdApplicationTests {
   @Test
   void shouldCreateListing() {
     createOwner();
-
     ListingsDto response = createListing(1);
 
     assertThat(response.getListings()).hasSize(1);
     var listingDto = response.getListings().get(0);
 
-    assertThat(listingDto.getContent()).isEqualTo(LISTING_CONTENT);
+    assertThat(listingDto.getId()).isNotBlank();
+    assertThat(listingDto.getTitle()).isEqualTo(LISTING_TITLE);
+    assertThat(listingDto.getDescription()).isEqualTo(LISTING_DESCRIPTION);
+    assertThat(listingDto.getPrice()).isEqualTo(LISTING_PRICE);
+    assertThat(listingDto.getPublicationStatus()).isEqualTo(Listing.PublicationStatus.INACTIVE);
   }
 
   @Test
@@ -81,7 +88,8 @@ class AdApplicationTests {
     createOwner();
     ListingsDto response = createListing(maxActiveListingsPerOwner + 1);
 
-    List<Integer> statusCodes = response.getListings().stream().map(
+    List<Integer> statusCodes = response.getListings().stream()
+        .map(
             listing -> when()
                 .post(ROOT_V1 + "/listings/{id}/publish", listing.getId())
                 .getStatusCode())
@@ -113,7 +121,9 @@ class AdApplicationTests {
     for (int i = 0; i < listingCount; i++) {
       JSONObject newListingRequest = new JSONObject();
       newListingRequest.put("ownerName", OWNER_NAME);
-      newListingRequest.put("content", LISTING_CONTENT);
+      newListingRequest.put("title", LISTING_TITLE);
+      newListingRequest.put("description", LISTING_DESCRIPTION);
+      newListingRequest.put("price", LISTING_PRICE);
 
       given()
           .contentType(ContentType.JSON)

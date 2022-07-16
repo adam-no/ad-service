@@ -17,7 +17,7 @@ public class ModifyPublicationStatusCommandHandler {
     Listing updatedListing = forManipulatingListing.getById(listingId)
         .orElseThrow(InvalidUpdateListingCommandException::new)
         .asBuilder()
-        .status(modifyPublicationStatusCommand.getListingStatus())
+        .status(modifyPublicationStatusCommand.getPublicationStatus())
         .build();
 
     forManipulatingListing.storeListing(updatedListing);

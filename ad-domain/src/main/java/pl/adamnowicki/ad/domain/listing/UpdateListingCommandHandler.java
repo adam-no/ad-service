@@ -16,7 +16,9 @@ public class UpdateListingCommandHandler {
     Listing updatedListing = forManipulatingListing.getById(listingId)
         .orElseThrow(InvalidUpdateListingCommandException::new)
         .asBuilder()
-        .content(updateListingCommand.getContent())
+        .title(updateListingCommand.getTitle())
+        .description(updateListingCommand.getDescription())
+        .price(updateListingCommand.getPrice())
         .build();
 
     forManipulatingListing.storeListing(updatedListing);
