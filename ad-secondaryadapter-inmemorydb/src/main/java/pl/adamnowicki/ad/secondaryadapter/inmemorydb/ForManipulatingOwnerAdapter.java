@@ -1,35 +1,57 @@
 package pl.adamnowicki.ad.secondaryadapter.inmemorydb;
 
 import lombok.extern.slf4j.Slf4j;
-import pl.adamnowicki.ad.domain.ForManipulatingOwner;
-import pl.adamnowicki.ad.domain.Owner;
+import pl.adamnowicki.ad.domain.owner.ForManipulatingOwner;
+import pl.adamnowicki.ad.domain.owner.Owner;
+import pl.adamnowicki.ad.domain.owner.OwnerName;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicLong;
+
+import static java.util.Optional.ofNullable;
 
 @Slf4j
 public class ForManipulatingOwnerAdapter implements ForManipulatingOwner {
 
-  private final ConcurrentHashMap<Long, Owner> ownerRepository = new ConcurrentHashMap<>();
-  private final AtomicLong ownerIdSequence = new AtomicLong(0);
+  private final ConcurrentHashMap<OwnerName, Owner> ownerRepository = new ConcurrentHashMap<>();
 
 
   @Override
-  public void storeOwner(Owner owner) {
-    ownerRepository.put(ownerIdSequence.getAndIncrement(), owner);
+  public void storeOwner(Owner newOwner) {
+    OwnerName ownerName = newOwner.getName();
+
+    Owner owner = Owner.builder()
+        .name(ownerName)
+        .listings(new ArrayList<>(newOwner.getListings()))
+        .build();
+
+    ownerRepository.put(ownerName, owner);
     log.trace("New owner stored, owner={}", owner);
   }
 
   @Override
   public List<Owner> getAllOwners() {
     log.trace("Fetching all owners requested");
-    return new ArrayList<>(ownerRepository.values());
+    return ownerRepository.values().stream()
+        .map(owner -> Owner.builder()
+            .name(owner.getName())
+            .listings(new ArrayList<>(owner.getListings()))
+            .build())
+        .toList();
+  }
+
+  @Override
+  public Optional<Owner> getByName(OwnerName name) {
+    return ofNullable(ownerRepository.get(name))
+        .map(owner -> Owner.builder()
+            .name(owner.getName())
+            .listings(new ArrayList<>(owner.getListings()))
+            .build());
   }
 
   public void cleanAll() {
-    ownerIdSequence.set(0);
     ownerRepository.clear();
   }
 }

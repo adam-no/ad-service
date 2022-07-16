@@ -1,10 +1,12 @@
 package pl.adamnowicki.ad.primaryadapter.restapi;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import pl.adamnowicki.ad.domain.CreateOwnerCommand;
-import pl.adamnowicki.ad.domain.CreateOwnerCommandHandler;
-import pl.adamnowicki.ad.domain.OwnerQuery;
+import pl.adamnowicki.ad.domain.owner.CreateOwnerCommand;
+import pl.adamnowicki.ad.domain.owner.CreateOwnerCommandHandler;
+import pl.adamnowicki.ad.domain.owner.InvalidCreateOwnerCommandException;
+import pl.adamnowicki.ad.domain.owner.OwnerQuery;
 import pl.adamnowicki.ad.primaryadapter.restapi.OwnersDto.OwnerDto;
 
 import static pl.adamnowicki.ad.primaryadapter.restapi.RestApiWebUiConfiguration.ROOT_V1;
@@ -21,7 +23,7 @@ public class OwnerController {
   OwnersDto listOwners() {
     var ownerDtos = ownerQuery.listAllOwners().stream()
         .map(owner -> OwnerDto.builder()
-            .name(owner.getName())
+            .name(owner.getName().unwrap())
             .build())
         .toList();
     return OwnersDto.builder()
@@ -30,10 +32,13 @@ public class OwnerController {
   }
 
   @PostMapping()
-  void createOwner(@RequestBody OwnerDto ownerDto) {
-    CreateOwnerCommand createOwnerCommand = CreateOwnerCommand.builder()
-        .name(ownerDto.getName())
-        .build();
+  void createOwner(@RequestBody CreateOwnerCommand createOwnerCommand) {
     createOwnerCommandHandler.handle(createOwnerCommand);
+  }
+
+  @ExceptionHandler(InvalidCreateOwnerCommandException.class)
+  ResponseEntity<?> invalidCommand() {
+    return ResponseEntity.badRequest()
+        .build();
   }
 }

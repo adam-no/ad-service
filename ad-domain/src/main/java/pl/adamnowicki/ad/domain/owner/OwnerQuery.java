@@ -1,4 +1,4 @@
-package pl.adamnowicki.ad.domain;
+package pl.adamnowicki.ad.domain.owner;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -13,7 +13,7 @@ public class OwnerQuery {
 
   public List<Owner> listAllOwners() {
     List<Owner> owners = forManipulatingOwner.getAllOwners();
-    log.debug("OwnerQuery requested, size={}", owners.size());
+    log.debug("Listing all owners requested, size={}", owners.size());
     return owners;
   }
 }
