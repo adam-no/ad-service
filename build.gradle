@@ -1,0 +1,51 @@
+plugins {
+    id 'org.springframework.boot' version '2.7.1' apply false
+    id 'io.spring.dependency-management' version '1.0.11.RELEASE' apply false
+    id 'com.google.cloud.tools.jib' version '3.2.1' apply false
+    id 'java'
+}
+
+subprojects {
+    group = 'pl.adamnowicki.ad'
+    version = '0.1.0'
+    sourceCompatibility = '17'
+
+    apply plugin: 'java'
+    apply plugin: 'io.spring.dependency-management'
+
+    repositories {
+        mavenCentral()
+    }
+
+    test {
+        useJUnitPlatform()
+    }
+
+    configurations {
+        compileOnly {
+            extendsFrom annotationProcessor
+        }
+    }
+
+    dependencyManagement {
+        dependencies {
+            dependency 'org.springdoc:springdoc-openapi-ui:1.6.4'
+            dependency 'org.projectlombok:lombok:1.18.22'
+            dependency 'org.junit.jupiter:junit-jupiter:5.7.2'
+            dependency 'jakarta.validation:jakarta.validation-api:2.0.2'
+            dependency 'org.slf4j:slf4j-api:1.7.30'
+            dependency 'ch.qos.logback:logback-core:1.2.9'
+            dependency 'io.rest-assured:rest-assured:4.4.0'
+            dependency 'org.hamcrest:hamcrest-core:2.2'
+
+        }
+    }
+
+    dependencies {
+        implementation 'org.slf4j:slf4j-api'
+        implementation 'ch.qos.logback:logback-core'
+
+        compileOnly 'org.projectlombok:lombok'
+        annotationProcessor 'org.projectlombok:lombok'
+    }
+}

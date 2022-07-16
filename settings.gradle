@@ -1,0 +1,12 @@
+rootProject.name = 'ad-service'
+
+include(
+        // Application bundler
+        'ad-app',
+        // Hexagone - Core domain logic
+		'ad-domain',
+        // Primary/ driving - calling hexagone
+		'ad-primaryadapter-restapi',
+        // Secondary/ driven - called by hexagone's port
+		'ad-secondaryadapter-inmemorydb'
+	)

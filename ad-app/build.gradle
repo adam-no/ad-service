@@ -1,0 +1,42 @@
+plugins {
+    id 'org.springframework.boot'
+    id 'com.google.cloud.tools.jib'
+}
+
+dependencies {
+    implementation project(':ad-primaryadapter-restapi')
+    implementation project(':ad-secondaryadapter-inmemorydb')
+    implementation project(':ad-domain')
+
+    // Technical
+    implementation 'org.springframework.boot:spring-boot-starter'
+    annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
+
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'org.junit.jupiter:junit-jupiter'
+}
+
+bootJar {
+    manifest {
+        attributes(
+                'Start-Class': 'pl.adamnowicki.ad.app.AdApplication',
+                'Implementation-Title': 'Ad by Adam Nowicki',
+                'Implementation-Version': archiveVersion)
+    }
+}
+
+jib {
+    from {
+        image = 'eclipse-temurin:17.0.3_7-jre-alpine@sha256:39c91dedb92fae7e01ef54540e17e3abb90ff5903ab5cad2a6a98d44f66ed257'
+    }
+    to {
+        image = 'ad-service'
+        tags = ['latest']
+    }
+    container {
+        jvmFlags = []
+        mainClass = 'pl.adamnowicki.ad.app.AdApplication'
+        args = []
+        ports = ['8080']
+    }
+}
