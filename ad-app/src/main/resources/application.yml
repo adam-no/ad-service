@@ -5,4 +5,4 @@ spring:
   application:
     name: ad
 
-ad.owner.max-active-listings: 2
+ad.owner.max-active-listings: 10
