@@ -57,3 +57,36 @@ This application is following the concept of Hexagonal Architecture (aka Ports &
 
 The project structure and implementation are inspired by:
 - https://jmgarridopaz.github.io/content/hexagonalarchitecture-ig/chapter2.html
+
+### Module dependencies
+
+![module-dependencies](./img/ad-module-dependencies.png)
+
+## Sample use-case scenario
+
+1. Create Owner
+
+       POST /api/v1/owners
+       
+       {
+         "name": "John"
+       }
+      
+2. Create Listing
+ 
+       POST /api/v1/listings
+
+       {
+         "title": "Some title",
+         "description": "Some description",
+         "price": 10.20,
+         "ownerName": "John"
+       }
+
+3. Get Listings
+
+       GET /api/v1/listings
+
+4. Publish Listing
+
+       POST /api/v1/listings/0bf6a9ac-e822-421a-8614-1f7a2ff16814/publish
