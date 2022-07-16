@@ -7,6 +7,7 @@ import org.apache.http.HttpStatus;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.web.server.LocalServerPort;
 import pl.adamnowicki.ad.domain.listing.ForManipulatingListing;
@@ -15,6 +16,8 @@ import pl.adamnowicki.ad.primaryadapter.restapi.ListingsDto;
 import pl.adamnowicki.ad.primaryadapter.restapi.OwnersDto;
 import pl.adamnowicki.ad.secondaryadapter.inmemorydb.ForManipulatingListingAdapter;
 import pl.adamnowicki.ad.secondaryadapter.inmemorydb.ForManipulatingOwnerAdapter;
+
+import java.util.List;
 
 import static io.restassured.RestAssured.given;
 import static io.restassured.RestAssured.when;
@@ -26,13 +29,16 @@ import static pl.adamnowicki.ad.primaryadapter.restapi.RestApiWebUiConfiguration
     webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class AdApplicationTests {
 
+  private static final String OWNER_NAME = "John Doe";
+  private static final String LISTING_CONTENT = "some content";
+
   @Autowired
   ForManipulatingOwner forManipulatingOwner;
   @Autowired
   ForManipulatingListing forManipulatingListing;
 
-  private static final String OWNER_NAME = "John Doe";
-  private static final String LISTING_CONTENT = "some content";
+  @Value("${ad.owner.max-active-listings}")
+  int maxActiveListingsPerOwner;
 
   @LocalServerPort
   int port;
@@ -50,20 +56,7 @@ class AdApplicationTests {
 
   @Test
   void shouldCreateOwner() {
-    JSONObject newOwnerRequest = new JSONObject();
-    newOwnerRequest.put("name", OWNER_NAME);
-
-    given()
-        .contentType(ContentType.JSON)
-        .body(newOwnerRequest.toString())
-        .when()
-        .post(ROOT_V1 + "/owners")
-        .then()
-        .statusCode(HttpStatus.SC_OK);
-
-    OwnersDto response = when()
-        .get(ROOT_V1 + "/owners")
-        .as(OwnersDto.class);
+    OwnersDto response = createOwner();
 
     assertThat(response.getOwners()).hasSize(1);
     var ownerDto = response.getOwners().get(0);
@@ -73,6 +66,33 @@ class AdApplicationTests {
 
   @Test
   void shouldCreateListing() {
+    createOwner();
+
+    ListingsDto response = createListing(1);
+
+    assertThat(response.getListings()).hasSize(1);
+    var listingDto = response.getListings().get(0);
+
+    assertThat(listingDto.getContent()).isEqualTo(LISTING_CONTENT);
+  }
+
+  @Test
+  void shouldLimitNumberOfActiveListings() {
+    createOwner();
+    ListingsDto response = createListing(maxActiveListingsPerOwner + 1);
+
+    List<Integer> statusCodes = response.getListings().stream().map(
+            listing -> when()
+                .post(ROOT_V1 + "/listings/{id}/publish", listing.getId())
+                .getStatusCode())
+        .toList();
+
+    assertThat(statusCodes)
+        .contains(HttpStatus.SC_OK, HttpStatus.SC_BAD_REQUEST)
+        .containsOnlyOnce(HttpStatus.SC_BAD_REQUEST);
+  }
+
+  private OwnersDto createOwner() {
     JSONObject newOwnerRequest = new JSONObject();
     newOwnerRequest.put("name", OWNER_NAME);
 
@@ -84,25 +104,28 @@ class AdApplicationTests {
         .then()
         .statusCode(HttpStatus.SC_OK);
 
-    JSONObject newListingRequest = new JSONObject();
-    newListingRequest.put("ownerName", OWNER_NAME);
-    newListingRequest.put("content", LISTING_CONTENT);
+    return when()
+        .get(ROOT_V1 + "/owners")
+        .as(OwnersDto.class);
+  }
 
-    given()
-        .contentType(ContentType.JSON)
-        .body(newListingRequest.toString())
-        .when()
-        .post(ROOT_V1 + "/listings")
-        .then()
-        .statusCode(HttpStatus.SC_OK);
+  private ListingsDto createListing(int listingCount) {
+    for (int i = 0; i < listingCount; i++) {
+      JSONObject newListingRequest = new JSONObject();
+      newListingRequest.put("ownerName", OWNER_NAME);
+      newListingRequest.put("content", LISTING_CONTENT);
 
-    ListingsDto response = when()
+      given()
+          .contentType(ContentType.JSON)
+          .body(newListingRequest.toString())
+          .when()
+          .post(ROOT_V1 + "/listings")
+          .then()
+          .statusCode(HttpStatus.SC_OK);
+    }
+
+    return when()
         .get(ROOT_V1 + "/listings")
         .as(ListingsDto.class);
-
-    assertThat(response.getListings()).hasSize(1);
-    var listingDto = response.getListings().get(0);
-
-    assertThat(listingDto.getContent()).isEqualTo(LISTING_CONTENT);
   }
 }

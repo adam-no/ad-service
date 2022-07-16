@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 
 @Slf4j
 @ControllerAdvice
-public class GenericControlAdvice {
+class GenericControlAdvice {
 
   @ExceptionHandler(IllegalStateException.class)
   ResponseEntity<?> invalidCommand(IllegalStateException e) {

@@ -4,3 +4,5 @@ server:
 spring:
   application:
     name: ad
+
+ad.owner.max-active-listings: 2

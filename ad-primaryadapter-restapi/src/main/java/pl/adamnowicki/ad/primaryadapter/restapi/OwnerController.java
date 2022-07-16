@@ -14,7 +14,7 @@ import static pl.adamnowicki.ad.primaryadapter.restapi.RestApiWebUiConfiguration
 @RestController
 @RequestMapping(ROOT_V1 + "/owners")
 @RequiredArgsConstructor
-public class OwnerController {
+class OwnerController {
 
   private final OwnerQuery ownerQuery;
   private final CreateOwnerCommandHandler createOwnerCommandHandler;
@@ -32,7 +32,10 @@ public class OwnerController {
   }
 
   @PostMapping()
-  void createOwner(@RequestBody CreateOwnerCommand createOwnerCommand) {
+  void createOwner(@RequestBody CreateOwnerRequest createOwnerRequest) {
+    CreateOwnerCommand createOwnerCommand = CreateOwnerCommand.builder()
+        .name(createOwnerRequest.getName())
+        .build();
     createOwnerCommandHandler.handle(createOwnerCommand);
   }
 

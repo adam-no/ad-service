@@ -14,7 +14,7 @@ public class AttachNewListingCommandHandler {
 
   public void handle(AttachNewListingCommand attachNewListingCommand) {
     log.debug("AttachNewListingCommand started, attachNewListingCommand={}", attachNewListingCommand);
-    OwnerName ownerName = of(attachNewListingCommand.getOwnerName());
+    OwnerName ownerName = attachNewListingCommand.getOwnerName();
     Owner owner = forManipulatingOwner.getByName(ownerName)
         .orElseThrow(() -> new InvalidAttachNewListingCommandException(
             "Specified owner name does not exists, ownerName=" + ownerName));

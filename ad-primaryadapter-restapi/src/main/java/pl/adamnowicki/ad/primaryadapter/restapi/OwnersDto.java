@@ -1,21 +1,21 @@
 package pl.adamnowicki.ad.primaryadapter.restapi;
 
 import lombok.Builder;
-import lombok.Data;
+import lombok.Value;
 
 import java.util.List;
 
-@Data
+@Value
 @Builder
 public class OwnersDto {
 
   @Builder.Default
   List<OwnerDto> owners = List.of();
 
-  @Data
+  @Value
   @Builder
   public static class OwnerDto {
 
-    private String name;
+    String name;
   }
 }

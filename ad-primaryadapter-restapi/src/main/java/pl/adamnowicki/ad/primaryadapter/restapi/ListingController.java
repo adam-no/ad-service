@@ -4,22 +4,26 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import pl.adamnowicki.ad.domain.listing.*;
+import pl.adamnowicki.ad.domain.owner.*;
 import pl.adamnowicki.ad.primaryadapter.restapi.ListingsDto.ListingDto;
 
 import java.util.UUID;
 
+import static pl.adamnowicki.ad.domain.listing.Listing.ListingStatus.INACTIVE;
 import static pl.adamnowicki.ad.domain.listing.ListingId.of;
 import static pl.adamnowicki.ad.primaryadapter.restapi.RestApiWebUiConfiguration.ROOT_V1;
 
 @RestController
 @RequestMapping(ROOT_V1 + "/listings")
 @RequiredArgsConstructor
-public class ListingController {
+class ListingController {
 
   private final ListingQuery listingQuery;
   private final CreateListingCommandHandler createListingCommandHandler;
-
   private final UpdateListingCommandHandler updateListingCommandHandler;
+  private final ModifyPublicationStatusCommandHandler modifyPublicationStatusCommandHandler;
+  private final PublishNewListingForOwnerCommandHandler publishNewListingForOwnerCommandHandler;
+  private final AttachNewListingCommandHandler attachNewListingCommandHandler;
 
   @GetMapping()
   ListingsDto listListings() {
@@ -35,8 +39,17 @@ public class ListingController {
   }
 
   @PostMapping()
-  void createListing(@RequestBody CreateListingCommand createListingCommand) {
-    createListingCommandHandler.handle(createListingCommand);
+  void createListing(@RequestBody CreateListingRequest createListingRequest) {
+    CreateListingCommand createListingCommand = CreateListingCommand.builder()
+        .content(createListingRequest.getContent())
+        .build();
+    ListingId handle = createListingCommandHandler.handle(createListingCommand);
+
+    AttachNewListingCommand attachNewListingCommand = AttachNewListingCommand.builder()
+        .listingId(handle)
+        .ownerName(OwnerName.of(createListingRequest.getOwnerName()))
+        .build();
+    attachNewListingCommandHandler.handle(attachNewListingCommand);
   }
 
   @GetMapping("/{id}")
@@ -49,8 +62,37 @@ public class ListingController {
   @PutMapping("/{id}")
   void updateSingleListing(
       @PathVariable("id") UUID listingId,
-      UpdateListingCommand updateListingCommand) {
+      UpdateListingRequest updateListingRequest) {
 
-    updateListingCommandHandler.handle(of(listingId), updateListingCommand);
+    UpdateListingCommand updateListingCommand = UpdateListingCommand.builder()
+        .listingId(of(listingId))
+        .content(updateListingRequest.getContent())
+        .build();
+
+    updateListingCommandHandler.handle(updateListingCommand);
+  }
+
+  @PostMapping("/{id}/publish")
+  ResponseEntity<?> publishSingleListing(
+      @PathVariable("id") UUID listingId) {
+
+    PublishNewListingForOwnerCommand publishNewListingForOwnerCommand = PublishNewListingForOwnerCommand.builder()
+        .listingId(of(listingId))
+        .build();
+
+    return publishNewListingForOwnerCommandHandler.handle(publishNewListingForOwnerCommand)
+        ? ResponseEntity.ok().build()
+        : ResponseEntity.badRequest().build();
+  }
+
+  @PostMapping("/{id}/unpublish")
+  void unpublishSingleListing(
+      @PathVariable("id") UUID listingId) {
+
+    ModifyPublicationStatusCommand modifyPublicationStatusCommand = ModifyPublicationStatusCommand.builder()
+        .listingStatus(INACTIVE)
+        .listingId(of(listingId))
+        .build();
+    modifyPublicationStatusCommandHandler.handle(modifyPublicationStatusCommand);
   }
 }

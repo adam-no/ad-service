@@ -1,11 +1,11 @@
-package pl.adamnowicki.ad.domain.listing;
+package pl.adamnowicki.ad.primaryadapter.restapi;
 
 import lombok.Builder;
 import lombok.Value;
 
 @Value
 @Builder
-public class CreateListingCommand {
+class UpdateListingRequest {
 
   String content;
 }

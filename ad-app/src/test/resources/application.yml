@@ -1,2 +1,4 @@
 logging.level:
   pl.adamnowicki.ad.domain: DEBUG
+
+ad.owner.max-active-listings: 3

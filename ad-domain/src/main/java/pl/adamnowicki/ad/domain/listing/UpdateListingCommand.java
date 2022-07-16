@@ -7,5 +7,6 @@ import lombok.Value;
 @Builder
 public class UpdateListingCommand {
 
+  ListingId listingId;
   String content;
 }

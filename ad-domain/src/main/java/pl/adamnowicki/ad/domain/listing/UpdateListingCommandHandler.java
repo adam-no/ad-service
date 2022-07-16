@@ -9,14 +9,13 @@ public class UpdateListingCommandHandler {
 
   private final ForManipulatingListing forManipulatingListing;
 
-  public void handle(ListingId listingId, UpdateListingCommand updateListingCommand) {
+  public void handle(UpdateListingCommand updateListingCommand) {
     log.debug("UpdateListingCommandHandler started, updateListingCommand={}", updateListingCommand);
 
-    forManipulatingListing.getById(listingId)
-        .orElseThrow(InvalidUpdateListingCommandException::new);
-
-    Listing updatedListing = Listing.builder()
-        .id(listingId)
+    ListingId listingId = updateListingCommand.getListingId();
+    Listing updatedListing = forManipulatingListing.getById(listingId)
+        .orElseThrow(InvalidUpdateListingCommandException::new)
+        .asBuilder()
         .content(updateListingCommand.getContent())
         .build();
 

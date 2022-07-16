@@ -1,6 +1,7 @@
 package pl.adamnowicki.ad.secondaryadapter.inmemorydb;
 
 import lombok.extern.slf4j.Slf4j;
+import pl.adamnowicki.ad.domain.listing.ListingId;
 import pl.adamnowicki.ad.domain.owner.ForManipulatingOwner;
 import pl.adamnowicki.ad.domain.owner.Owner;
 import pl.adamnowicki.ad.domain.owner.OwnerName;
@@ -49,6 +50,13 @@ public class ForManipulatingOwnerAdapter implements ForManipulatingOwner {
             .name(owner.getName())
             .listings(new ArrayList<>(owner.getListings()))
             .build());
+  }
+
+  @Override
+  public Optional<Owner> getByListingId(ListingId listingId) {
+    return ownerRepository.values().stream()
+        .filter(owner -> owner.getListings().contains(listingId))
+        .findFirst();
   }
 
   public void cleanAll() {

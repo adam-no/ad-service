@@ -21,9 +21,8 @@ public class ForManipulatingListingAdapter implements ForManipulatingListing {
     ListingId id = Optional.ofNullable(newListing.getId())
         .orElse(ListingId.generate());
 
-    Listing listing = Listing.builder()
+    Listing listing = newListing.asBuilder()
         .id(id)
-        .content(newListing.getContent())
         .build();
 
     repository.put(id, listing);
@@ -34,20 +33,14 @@ public class ForManipulatingListingAdapter implements ForManipulatingListing {
   public List<Listing> getAllListings() {
     log.trace("Fetching all listing requested");
     return repository.values().stream()
-        .map(listing -> Listing.builder()
-            .id(listing.getId())
-            .content(listing.getContent())
-            .build())
+        .map(listing -> listing.asBuilder().build())
         .toList();
   }
 
   @Override
   public Optional<Listing> getById(ListingId listingId) {
     return Optional.ofNullable(repository.get(listingId))
-        .map(listing -> Listing.builder()
-            .id(listing.getId())
-            .content(listing.getContent())
-            .build());
+        .map(listing -> listing.asBuilder().build());
   }
 
   public void cleanAll() {

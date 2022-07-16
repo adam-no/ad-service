@@ -1,18 +1,16 @@
 package pl.adamnowicki.ad.app.domain;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import pl.adamnowicki.ad.domain.listing.CreateListingCommandHandler;
-import pl.adamnowicki.ad.domain.listing.ForManipulatingListing;
-import pl.adamnowicki.ad.domain.listing.ListingQuery;
-import pl.adamnowicki.ad.domain.listing.UpdateListingCommandHandler;
-import pl.adamnowicki.ad.domain.owner.AttachNewListingCommandHandler;
-import pl.adamnowicki.ad.domain.owner.CreateOwnerCommandHandler;
-import pl.adamnowicki.ad.domain.owner.ForManipulatingOwner;
-import pl.adamnowicki.ad.domain.owner.OwnerQuery;
+import pl.adamnowicki.ad.domain.listing.*;
+import pl.adamnowicki.ad.domain.owner.*;
 
 @Configuration
 public class DomainConfiguration {
+
+  @Value("${ad.owner.max-active-listings}")
+  int maxActiveListingsPerOwner;
 
   @Bean
   OwnerQuery ownerQuery(ForManipulatingOwner forManipulatingOwner) {
@@ -30,13 +28,8 @@ public class DomainConfiguration {
   }
 
   @Bean
-  CreateListingCommandHandler createListingCommandHandler(
-      AttachNewListingCommandHandler attachNewListingCommandHandler,
-      ForManipulatingListing forManipulatingListing) {
-
-    return new CreateListingCommandHandler(
-        attachNewListingCommandHandler,
-        forManipulatingListing);
+  CreateListingCommandHandler createListingCommandHandler(ForManipulatingListing forManipulatingListing) {
+    return new CreateListingCommandHandler(forManipulatingListing);
   }
 
   @Bean
@@ -47,5 +40,25 @@ public class DomainConfiguration {
   @Bean
   UpdateListingCommandHandler updateListingCommandHandler(ForManipulatingListing forManipulatingListing) {
     return new UpdateListingCommandHandler(forManipulatingListing);
+  }
+
+  @Bean
+  ModifyPublicationStatusCommandHandler modifyPublicationStatusCommandHandler(
+      ForManipulatingListing forManipulatingListing) {
+
+    return new ModifyPublicationStatusCommandHandler(forManipulatingListing);
+  }
+
+  @Bean
+  PublishNewListingForOwnerCommandHandler publishNewListingForOwnerCommandHandler(
+      ForManipulatingOwner forManipulatingOwner,
+      ModifyPublicationStatusCommandHandler modifyPublicationStatusCommandHandler,
+      ListingQuery listingQuery) {
+
+    return new PublishNewListingForOwnerCommandHandler(
+        maxActiveListingsPerOwner,
+        forManipulatingOwner,
+        modifyPublicationStatusCommandHandler,
+        listingQuery);
   }
 }
