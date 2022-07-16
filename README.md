@@ -2,6 +2,10 @@
 
 ## Quickstart
 
+### Prerequisites
+
+   - at least Java 17 installed
+
 ### Build
 
       ./gradlew build
@@ -20,6 +24,12 @@
 #### Running application via IntelliJ
 
 Use `AdApplication` run-configuration stored in the project file
+
+### REST API
+
+The Rest API is accessible via Swagger:
+
+      http://localhost:8080/swagger-ui/index.html
 
 ## Domain
 

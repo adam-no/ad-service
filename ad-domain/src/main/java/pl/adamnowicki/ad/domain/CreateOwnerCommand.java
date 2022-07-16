@@ -5,7 +5,7 @@ import lombok.Value;
 
 @Value
 @Builder
-public class Owner {
+public class CreateOwnerCommand {
 
   String name;
 }
